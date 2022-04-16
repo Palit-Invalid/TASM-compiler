@@ -1,0 +1,5 @@
+*.asm
+*.obj
+*.out
+*.dat
+*.vscode
