@@ -5,8 +5,9 @@
 
 #include "variables.h"
 #include "functions.h"
+#include "gen_obj.h"
 
-char *compiler_version = "Turbo Assembler 0.1";
+char *compiler_version = "Turbo Assembler  Version 2.0";
 
 int main(int argc, char **argv)
 {
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
     }
     
     FILE *ftmp;
-    char fname[2][10] = {"t1.dat", "t2.dat"};
+    //char fname[2][10] = {"t1.dat", "t2.dat"};
 
     printf("\n----------Second passage----------\n");
     pmdf = 0;
@@ -167,7 +168,7 @@ int main(int argc, char **argv)
                 putchar('\n');
             } else
             {
-                fprintf(stderr, "Error: wrong operand!\n");
+                fprintf(stderr, "Error: wrong operand (pole[0])!\n");
             }
             continue;
         }
@@ -196,7 +197,7 @@ int main(int argc, char **argv)
                 putchar('\n');
             } else
             {
-                fprintf(stderr, "Error: wrong operand!\n");
+                fprintf(stderr, "Error: wrong operand (pole[1])!\n");
             }
         }
     }
@@ -209,94 +210,11 @@ int main(int argc, char **argv)
         return 4;
     }
 
-    int of = offset(0x80 + strlen(argv[1]) + 2 + 0x0 + 0xb, argv[1]);    
-    fprintf(fobj, "%c%c%c%c%s%c", 0x80, strlen(argv[1]) + 2, 0x0, 0xb, argv[1], of); 
+    firstBlock(fobj, compiler_version, argv[1]);
+    secondBlock(fobj, nseg, segtab);
+    //thirdBlock(fobj);
+    fourthBlock(fobj);
     
-    of = offset(0x88 + strlen(compiler_version) + 4 + 0x0 + 0x0 + 0x0 + 0x1c, compiler_version);
-    fprintf(fobj, "%c%c%c%c%c%c%s%c", 0x88, strlen(compiler_version) + 4, 0x0, 0x0, 0x0, 0x1c, compiler_version, of);
-    
-    of = offset(0x88 + 0x10 + 0x0 + 0x40 + 0xe9 + 0xf9 + 0x58 + 0x34 + 0x21 + strlen(argv[1]), argv[1]);
-    fprintf(fobj, "%c%c%c%c%c%c%c%c%c%c%s%c", 0x88, 0x10, 0x0, 0x40, 0xe9, 0xf9, 0x58, 0x34, 0x21, strlen(argv[1]), argv[1], of);
-    
-    fprintf(fobj, "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c", 0x88, 0x3, 0x0, 0x40, 0xe9, 0x4c, 0x96, 0x2, 0x0, 0x0, 0x68, 0x88, 0x3, 0x0, 0x40, 0xa1, 0x94);
-    
-    int y;
-    for(y = 0; y <= 1; y++)
-    {
-        
-        c = 0;
-        i = 0x96; c += i; fputc(i, fobj);
-        i = strlen(segtab[y].name) + 2; c += i; fputc(i, fobj);
-        i = 0; c += i; fputc(i, fobj);
-        i = strlen(segtab[y].name); c += i; fputc(i, fobj);
-        int x;
-        for(x = 0; x < strlen(segtab[y].name); x++)
-        {
-            i = toupper(segtab[y].name[x]);
-            c += i;
-            fputc(i, fobj);
-        }
-        
-        i = 0 -c; fputc(i, fobj);
-        c = 0;
-        i = 0x98; c += i; fputc(i, fobj);
-        i = 0x7; c += i; fputc(i, fobj);
-        i = 0x0; c += i; fputc(i, fobj);
-        i = 0x60; c += i; fputc(i, fobj);
-        i = segtab[y].len; c += i; fputc(i, fobj);
-        i = 0x0; c += i; fputc(i, fobj);
-        i = y + 2; c += i; fputc(i, fobj);
-        i = 0x01; c += i; fputc(i, fobj);
-        i = 0x01; c += i; fputc(i, fobj);
-        i = 0 - c; c += i; fputc(i, fobj);
-    }
-    
-    fprintf(fobj,"%c%c%c%c%c%c%c", 0x88, 0x4, 0x0, 0x40, 0xa2, 0x1, 0x91);
-
-    for(y = 0; y <= 1; y++)
-    {
-        c = 0;
-        i = 0xa0; c += i; fputc(i, fobj);
-        i = segtab[y].len + 4; c += i; fputc(i, fobj);
-        i = 0; c += i; fputc(i, fobj);
-        i = y + 1; c += i; fputc(i, fobj);
-        i = 0; c += i; fputc(i, fobj);
-        i = 0; c += i; fputc(i, fobj);
-        ftmp = fopen(fname[y], "rb");
-        if(!ftmp)
-        {
-            perror(fname[y]);
-            return 5;
-        }
-        int x;
-        for(x = 0; x < segtab[y].len; x++)
-        {
-            i = fgetc(ftmp);
-            c += i;
-            fputc(i, fobj);
-        }
-        fclose(ftmp);
-        i = 0 - c; fputc(i, fobj);
-    }
-    
-    modif[pmdf] = '\0';
-    c = 0;
-    i = 0x9c; c += i; fputc(i, fobj);
-    i = 2*strlen(modif) + 1; c += i; fputc(i, fobj);
-    i = 0; c += i; fputc(i, fobj);
-    i = 0xc4; c += i; fputc(i, fobj);
-    i = modif[0]; c += i; fputc(i, fobj);
-    i = 0x54; c += i; fputc(i, fobj);
-    i = modif[1]; c += i; fputc(i, fobj);
-    for(y = 0; y < strlen(modif); i += 2)
-    {
-        i = 0xc4; c += i; fputc(i, fobj);
-        i = modif[y]; c += i; fputc(i, fobj);
-        i = 0x54; c += i; fputc(i, fobj);
-        i = modif[y+1]; c += i; fputc(i, fobj);
-    }
-    i = 0 - c; fputc(i, fobj);
-    fprintf(fobj, "%c%c%c%c%c%c%c%c%c%c", 0x8a, 0x7, 0x0, 0xc1, 0x0, 0x2, 0x2, 0x0, 0x0, 0xaa);
     printf("SYMTAB\n");
     printf("%10s%10s%10s\n", "Name", "Disp", "Seg");
     for(i = 0; i < psym; i++)

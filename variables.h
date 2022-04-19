@@ -4,6 +4,8 @@
 static char npr, cnt, stk[80], pole[4][8];
 static int psym, pmdf, i;
 
+
+//CBW, JE, ADC, SAL, INC
 static const char optab[14][5] = 
 {
     "mov", "push", "cmp", "jle", 
@@ -30,7 +32,7 @@ static char modif[20];
 static struct segt
 {
     char name[8];
-    char len;
+    int len;
 } segtab[2];
 
 static struct symt
@@ -39,5 +41,10 @@ static struct symt
     char sgm;
     int dsp;
 } symtab[10];
+
+static const char fname[2][10] =
+{
+    "t1.dat", "t2.dat"
+};
 
 #endif

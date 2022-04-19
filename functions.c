@@ -397,7 +397,7 @@ int op2code(char nmb, int dis, char pol[4][8], char code[4])
             return 1;
             break;
         
-        case 11:
+        case 11: //je
             if(npr)
             {
                 tmp3 = findsym(pole[dis]);
